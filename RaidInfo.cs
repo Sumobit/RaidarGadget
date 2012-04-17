@@ -355,18 +355,31 @@ namespace RaidarGadget {
             // Remove the raw header as it contains no(?) usable info
             rawData = rawData.Remove(0, HeaderByteCount);
 
-            // Raw package to test specific cases
+            // Uncomment raw package assignments below to test specific incoming package types
+            // Test 1: Default test package
             //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\tmodel!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
             //    "fan!!0!!status=ok::descr=2352RPM\n" +
             //    "temp!!0!!status=ok::descr=34.0C\n" +
-            //    "disk!!1!!status=ok::descr=Channel 1: ST3320620AS 298 GB\n" +
-            //    "disk!!2!!status=ok::descr=Channel 2: ST3320620AS 298 GB\n" +
-            //    "disk!!3!!status=ok::descr=Channel 3: ST3320620AS 298 GB\n" +
-            //    "disk!!4!!status=ok::descr=Channel 4: ST3320620AS 298 GB\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!3!!status=ok::descr=Channel 3: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!4!!status=ok::descr=Channel 4: ST3320620AS 298 GB, 39C/102F\n" +
             //    "\tFS_CHECK\n" +
             //    "\t66\t1\t1\n";
 
-            // Test: Szerda
+            // Test 2: alert status messages
+            //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\tmodel!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
+            //    "fan!!0!!status=not_ok::descr=0RPM\n" +
+            //    "temp!!1!!status=not_ok::descr=65.0C/150.0F::expected=0-60C/32-140F\n" +
+            //    "volume!!1!!status=not_ok::descr= C: RAID Level X, ; 140 GB (15%)  921 GB\n" +
+            //    "disk!!1!!status=not_ok::descr=Channel 1: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!3!!status=not_ok::descr=Channel 3: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "disk!!4!!status=ok::descr=Channel 4: ST3320620AS 298 GB, 39C/102F\n" +
+            //    "\tFS_CHECK\n" +
+            //    "\t66\t1\t1\n";
+
+            // Test 3: Szerda package
             //rawData = "e0:91:f5:f9:9c:da\tXYZ-NAS\t192.168.0.1\tfan!!1!!status=ok::descr=1630RPM\n" +
             //    "ups!!1!!status=not_present::descr=\n" +
             //    "volume!!1!!status=ok::descr= C: RAID Level X, ; 140 GB (15%)  921 GB\n"+
