@@ -389,6 +389,19 @@ namespace RaidarGadget {
             //    "\tRAIDiator!!version=4.1.8,time=1314924646\n" +
             //    "\t66\n";
 
+            // Test 4: UPS test package
+            //rawData = "00:0d:a2:01:d4:56\tRandom\t192.168.178.27\ttemp!!1!!status=ok::descr=34.0C/93.2F::expected=0-60C/32-140F\n" +
+            //    "fan!!1!!status=ok::descr=2027RPM\n" +
+            //    "ups!!1!!status=ok::descr=APC Back-UPS ES 700 Battery charge: 100%, 23 min\n" +
+            //    "volume!!1!!status=ok::descr=Volume C: RAID Level X, Redundant; 2432 GB (43%) of 5560 GB used\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: WDC WD20EARS-00S8B1 1863 GB, 38C/100F;10 ATA Errors\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: WDC WD20EARS-00S8B1 1863 GB, 42C/107F;10 ATA Errors\n" +
+            //    "disk!!3!!status=ok::descr=Channel 3: WDC WD20EARS-00S8B1 1863 GB, 43C/109F\n" +
+            //    "disk!!4!!status=ok::descr=Channel 4: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
+            //    "model!!0!!mode=pro::descr=ReadyNAS NV+::arch=nsp\n" +
+            //    "	RAIDiator!!version=4.1.9-T6,time=1331164301\n" +
+            //    "	66\n";
+
             // Split the raw data
             string[] outerArr = rawData.Split('\t');
             if (outerArr.Length < 5) {
@@ -649,8 +662,8 @@ namespace RaidarGadget {
     /// The UPS information of the device.
     /// </summary>
     public class RaidUPS {
-        private static Regex upsRegEx = new Regex(@"^status=([a-z_]+)::descr=([.]+)*", RegexOptions.Compiled);
-        private static Regex upsDescrRegEx = new Regex(@"([.]+)\nBattery\scharge:\s*([0-9]+)%,\s*([.]+)*", RegexOptions.Compiled);
+        private static Regex upsRegEx = new Regex(@"^status=([a-z_]+)::descr=(.*)", RegexOptions.Compiled);
+        private static Regex upsDescrRegEx = new Regex(@"(.*)\sBattery\scharge:\s*([0-9]+)%,\s*(.*)", RegexOptions.Compiled);
 
         private Status status = Status.unknown;
         private string description = "";
@@ -707,7 +720,7 @@ namespace RaidarGadget {
                 }
                 if (status != RaidarGadget.Status.not_present) {
                     Match descrMatch = upsDescrRegEx.Match(match.Groups[2].Value);
-                    if (match.Groups.Count >= 4) {
+                    if (descrMatch.Groups.Count >= 4) {
                         description = descrMatch.Groups[1].Value;
                         charge = descrMatch.Groups[2].Value;
                         timeLeft = descrMatch.Groups[3].Value;

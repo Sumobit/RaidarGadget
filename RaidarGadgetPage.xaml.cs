@@ -275,7 +275,7 @@ namespace RaidarGadget {
             if ((raidInfo.Ups == null) || (raidInfo.Ups.Status == Status.not_present)) {
                 upsLabel.Content = String.Empty;
             } else {
-                upsLabel.Content = StringResources.String_UPS + raidInfo.Ups.Charge;
+                upsLabel.Content = StringResources.String_UPS + raidInfo.Ups.Charge + "%";
 
                 // Tooltip and alert status
                 SetToolTip(upsLabel, StringResources.String_UPS + "\n" + raidInfo.Ups.Description + "\n" +
