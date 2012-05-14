@@ -188,8 +188,8 @@ namespace RaidarGadget {
         }
 
         /// <summary>
-        /// Asynchronously update the NAS status step 2: Callback that updates
-        /// the result on the page
+        /// Asynchronously update the NAS status step 2: Callback when no message
+        /// of the NAS is received after the time-out period has passed.
         /// </summary>
         private void OnNasConnectionLost(object sender, MessageEventArgs args) {
             nasIdLabel.Content = StringResources.String_ConnectionLost;
