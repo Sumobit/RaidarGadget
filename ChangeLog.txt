@@ -1,0 +1,63 @@
+To Do
+- Fans
+	- monitor other fans for statuses other than okay and alert user
+- Temperatures
+	- monitor other temperatures for statuses other than okay and alert user
+	- consider!! where temp is unknown use avg of temp of disks
+- set up 'Settings' form
+	- use setting form to pass PollNasRate
+	- use setting form to set IP of NAS to be monitored
+
+
+Change Log
+v3.3
+- resized from 125w x 145h to 130w x 145h (130w being a standard size for SideBar Gadgets)
+- fanSpeedLabel; Set background color to match status, eg
+  - 'OK' as Lime/Limegreen
+  - 'Warn' as Orange/DarkOrange
+- DiskDescription; 
+  - simplified code to read and format description of disk (brand model capacity)
+  - updated REGEX expression to collect DiskStatus without semi colon whilst still getting the 'Sleeping' status
+- Allow for multiple Fans
+	- show details for Fan with lowest index on gadget; show summary of other fans in the tool tip
+- Allow for multiple Temperatures
+	- show details for Temperature with lowest index on gadget; show summary of other Temperatures in the tool tip
+
+v3.2
+- MAC Address; set text tp upper case
+- upsLabel; Set background color to match status, eg
+  - 'OK' as Lime/Limegreen
+  - 'Warn' as Orange/DarkOrange
+- DiskDescription; description of disk (brand model capacity) reformatted to fit within the tooltip
+
+v3.1
+- resized from 138w x138h to 125w x 145h
+
+
+
+NOTES
+Link to REGEX quick Reference http://msdn.microsoft.com/en-us/library/az24scfc.aspx
+Link REGEX builder http://gskinner.com/RegExr/
+Link REGEX builder http://txt2re.com/index-csharp.php3?s=&submit=Show+Matches
+Link to REGEX tester http://www.regextester.com/
+Link to REGEX tester http://www.regexplanet.com/advanced/java/index.html
+
+
+NOTES re XBAP and JS interaction
+a/ appears that XBAP can not interact with the HTML and Javascript in anyway
+that is useful to allow the gadget settings option to be used... alt use ActiveX
+source:  http://www.codeproject.com/Articles/17588/Drag-and-Drop-Archiver-gadget
+extract:  ActiveX versus XBAP
+          The gadget is developed around an ActiveX component developed in C# using 
+          Visual Studio 2005 and WinForms 2.0 . The decision not to use WPF and XBAP was
+          taken because XBAP has no way to interact with the HTML and JavaScript in which
+          it resides. Thus, using gadget Settings to customize the behavior of the gadget
+          would be impossible. To the contrary, an ActiveX control is not only simple to 
+          build in C# but also allows for simple interaction with JavaScript. 
+
+b/ details to enable communications with the HostScript
+source:  http://msdn.microsoft.com/en-us/library/aa970060.aspx
+
+
+NOTEs re resizing the gadget
+source http://msdn.microsoft.com/en-us/library/ff486201%28v=vs.85%29.aspx
