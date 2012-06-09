@@ -404,6 +404,15 @@ namespace RaidarGadget.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Battery: .
+        /// </summary>
+        internal static string String_UPS_Battery {
+            get {
+                return ResourceManager.GetString("String_UPS_Battery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Volume status:
         ///.
         /// </summary>

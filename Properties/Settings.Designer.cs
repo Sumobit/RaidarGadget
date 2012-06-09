@@ -34,5 +34,17 @@ namespace RaidarGadget.Properties {
                 this["MyIP"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("5")]
+        public int PollNasRate {
+            get {
+                return ((int)(this["PollNasRate"]));
+            }
+            set {
+                this["PollNasRate"] = value;
+            }
+        }
     }
 }

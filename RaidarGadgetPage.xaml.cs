@@ -29,6 +29,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using StringResources = RaidarGadget.Properties.Resources;
+using System.Windows.Interop;
 
 namespace RaidarGadget {
     /// <summary>
@@ -60,8 +61,6 @@ namespace RaidarGadget {
         private List<Label> volumeInfoLabels = new List<Label>();
 
         private bool debug = false;
-
-        //private RaidFan tempFan;
 
         public RaidarGadgetPage() {
             Dispatcher.ShutdownStarted += Dispatcher_ShutdownStarted;
@@ -388,6 +387,7 @@ namespace RaidarGadget {
 
                 // Set Tooltip message
                 SetToolTip(upsLabel, StringResources.String_UPS + "\n" + raidInfo.Ups.Description + "\n" +
+                    StringResources.String_UPS_Battery + raidInfo.Ups.Charge + "%, " + raidInfo.Ups.TimeLeft +"\n" +
                     RaidStatusMap.GetStatusString(raidInfo.Ups.Status, raidInfo.Ups));
             }
         }
@@ -452,83 +452,6 @@ namespace RaidarGadget {
                 label.Foreground = alertBrush;
             }
         }
-
-        ///// <summary>
-        ///// Update temperature information
-        ///// </summary>
-        ///// <param name="fan"></param>
-        //private void SetTemperatureInfo(RaidTemperature temperature) {
-        //    if (raidInfo.Temperature != null) {
-        //        // check for multiple Temp sensors
-
-        //        // Set label values
-        //        minTempLabel.Content = raidInfo.Temperature.MinExpectedCelcius +
-        //            StringResources.String_Celsius;
-        //        maxTempLabel.Content = raidInfo.Temperature.MaxExpectedCelcius +
-        //            StringResources.String_Celsius;
-        //        curTempLabel.Content = raidInfo.Temperature.TempCelcius +
-        //            StringResources.String_Celsius;
-
-        //        // Tooltip and alert status
-        //        SetToolTip(curTempLabel, RaidStatusMap.GetStatusString(
-        //            raidInfo.Temperature.Status, raidInfo.Temperature));
-        //        //SetToolTip(minTempLabel, RaidStatusMap.GetStatusString(
-        //        //    raidInfo.Temperature.Status, raidInfo.Temperature));
-        //        //SetToolTip(maxTempLabel, RaidStatusMap.GetStatusString(
-        //        //    raidInfo.Temperature.Status, raidInfo.Temperature));
-        //        SetToolTip(thermometerPath, RaidStatusMap.GetStatusString(
-        //            raidInfo.Temperature.Status, raidInfo.Temperature));
-        //        SetToolTip(levelPath, RaidStatusMap.GetStatusString(
-        //            raidInfo.Temperature.Status, raidInfo.Temperature));
-
-        //        if (raidInfo.Temperature.Status == Status.ok) {
-        //            curTempLabel.Foreground = defaultBrush;
-        //        } else {
-        //            curTempLabel.Foreground = alertBrush;
-        //        }
-
-        //        // Calculate new Y value for thermometer mercury
-        //        float tempRange = raidInfo.Temperature.MaxExpectedCelcius - raidInfo.Temperature.MinExpectedCelcius;
-        //        float tempFractional = raidInfo.Temperature.TempCelcius / tempRange;
-        //        float newTemperatureY = 50f - (25f * tempFractional);
-
-        //        // Calculate the thermometer mercury color
-        //        levelPath.Fill = new SolidColorBrush(Colors.DarkGray);
-        //        if (raidInfo.Temperature.TempCelcius <= raidInfo.Temperature.MinExpectedCelcius) {
-        //            levelPath.Fill = new SolidColorBrush(Colors.Blue);
-        //        } else if (raidInfo.Temperature.TempCelcius >= raidInfo.Temperature.MaxExpectedCelcius) {
-        //            levelPath.Fill = new SolidColorBrush(Colors.Red);
-        //        }
-
-        //        // Clip temperature bounds to avoid drawing errors
-        //        if (newTemperatureY < 25f) {
-        //            newTemperatureY = 25f;
-        //        } else if (newTemperatureY > 50f) {
-        //            newTemperatureY = 50f;
-        //        }
-
-        //        // Draw new mercury level
-        //        PathGeometry geometry = levelPath.Data as PathGeometry;
-        //        if (geometry != null) {
-        //            if (Math.Abs(newTemperatureY - oldTemperatureY) >= float.Epsilon) {
-        //                foreach (PathFigure figure in geometry.Figures) {
-        //                    for (int i = 0; i < 2; i++) {
-        //                        LineSegment lineSegment = figure.Segments[i] as LineSegment;
-        //                        if (lineSegment != null) {
-        //                            lineSegment.Point = new Point(lineSegment.Point.X, newTemperatureY);
-        //                        }
-        //                    }
-        //                }
-        //                oldTemperatureY = newTemperatureY;
-        //            }
-        //        }
-        //    } else {
-        //        // No temperature Sensor; so no value to display
-        //        SetToolTip(curTempLabel, StringResources.String_Unknown_Temperature);
-        //        SetToolTip(thermometerPath, StringResources.String_Unknown_Temperature);
-        //        SetToolTip(levelPath, StringResources.String_Unknown_Temperature);
-        //    }
-        //}
 
         /// <summary>
         /// Update temperature information
@@ -745,13 +668,14 @@ namespace RaidarGadget {
             //// the HostScript object will be null.
             //dynamic script = BrowserInteropHelper.HostScript;
 
-            //if (script != null) {
+            //if (script != null)
+            //{
             //    Log("Script isn't null !");
             //    // Call a script function.
             //    // For this to work the function 'func' should be added in javascript to main.html
             //    script.func("Hello host!");
             //}
-            CircularLogBuffer.DumpLog();
+            //CircularLogBuffer.DumpLog();
         }
 
         /// <summary>

@@ -239,10 +239,8 @@ namespace RaidarGadget {
         private string name;
         private string ip;
         
-        //private RaidTemperature temp;
         private List<RaidTemperature> temps = new List<RaidTemperature>();
         
-        //private RaidFan fan;
         private List<RaidFan> fans = new List<RaidFan>();
         
         private RaidUPS ups;
@@ -281,15 +279,6 @@ namespace RaidarGadget {
             }
         }
 
-        ///// <summary>
-        ///// Gets the device <see cref="RaidTemperature"/> structure.
-        ///// </summary>
-        //public RaidTemperature Temperature {
-        //    get {
-        //        return temp;
-        //    }
-        //}
-
         /// <summary>
         /// Gets the list of <see cref="RaidTemperature"/> of the device.
         /// </summary>
@@ -301,15 +290,6 @@ namespace RaidarGadget {
             }
         }
         
-        ///// <summary>
-        ///// Gets the device <see cref="RaidFan"/> structure.
-        ///// </summary>
-        //public RaidFan Fan {
-        //    get {
-        //        return fan;
-        //    }
-        //}
-
         /// <summary>
         /// Gets the list of <see cref="RaidFan"/> of the device.
         /// </summary>
@@ -580,6 +560,7 @@ namespace RaidarGadget {
             }
 
             // TODO: Get device time???
+            // Note value doesnt change with time.  Might be related to firmware version timestamp
             //r = new Regex(@".*time=([0-9]+).*", RegexOptions.Compiled);
             //patternMatch = r.Match(versionUnparsed);
             //if (patternMatch.Groups.Count >= 2)

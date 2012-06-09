@@ -22,7 +22,7 @@
 <gadget>
   <name>RaidarGadget (Beta)</name>
   <namespace>RaidarGadget</namespace>
-  <version>0.3.3</version>
+  <version>0.3.4</version>
   <author name="M.F. Meijer" />
   <copyright>&#169; M.F. Meijer, 25-jan-2012</copyright>
   <description>Displays ReadyNAS device info in the Windows sidebar</description>

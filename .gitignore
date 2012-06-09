@@ -102,6 +102,7 @@ publish
 [Bb]in
 [Oo]bj
 Gadget
+_misc
 sql
 TestResults
 *.Cache
