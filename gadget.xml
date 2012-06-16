@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
     Copyright 2012, Marc Meijer
+    Copyright 2012, Neil Blanchard
 
     This file is part of RaidarGadget.
 
@@ -20,11 +21,11 @@
 <!-- Description : Contains the information visible in the Windows add gadget panel. Used to identify the gadget.
      Reference : http://msdn.microsoft.com/en-us/library/bb508509%28VS.85%29.aspx -->
 <gadget>
-  <name>RaidarGadget (Beta)</name>
+  <name>RaidarGadget</name>
   <namespace>RaidarGadget</namespace>
-  <version>0.3.4</version>
-  <author name="M.F. Meijer" />
-  <copyright>&#169; M.F. Meijer, 25-jan-2012</copyright>
+  <version>0.4.0</version>
+  <author name="M.F. Meijer, N Blanchard" />
+  <copyright>&#169; M.F. Meijer, 25-Jan-2012</copyright>
   <description>Displays ReadyNAS device info in the Windows sidebar</description>
   <icons>
     <icon height="48" width="48" src="images/icon.png" />

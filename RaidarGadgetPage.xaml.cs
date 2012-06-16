@@ -1,6 +1,7 @@
 ﻿//------------------------------------------------------------------------------
 //
 //    Copyright 2012, Marc Meijer
+//    Copyright 2012, Neil Blanchard
 //
 //    This file is part of RaidarGadget.
 //

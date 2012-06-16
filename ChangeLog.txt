@@ -10,6 +10,9 @@ To Do
 
 
 Change Log
+v4.0
+Release version
+
 v3.4
 - Set UPS and Fan label text to BOLD back to provide better contrast against background colour 
 - UPS; added Battery % and time to tooltip
@@ -42,31 +45,3 @@ v3.1
 NOTES
 deployment option; use the following in the post build step to publish direct (without need to install)
 xcopy /y "$(TargetDir)*.*" "$(UserProfile)\AppData\Local\Microsoft\Windows Sidebar\Gadgets\$(ProjectName).gadget\"
-
-
-NOTES
-Link to REGEX quick Reference http://msdn.microsoft.com/en-us/library/az24scfc.aspx
-Link to REGEX builder http://gskinner.com/RegExr/
-Link to REGEX builder http://txt2re.com/index-csharp.php3?s=&submit=Show+Matches
-Link to REGEX tester http://www.regextester.com/
-Link to REGEX tester http://www.regexplanet.com/advanced/java/index.html
-
-
-NOTES re XBAP and JS interaction
-a/ appears that XBAP can not interact with the HTML and Javascript in anyway
-that is useful to allow the gadget settings option to be used... alt use ActiveX
-source:  http://www.codeproject.com/Articles/17588/Drag-and-Drop-Archiver-gadget
-extract:  ActiveX versus XBAP
-          The gadget is developed around an ActiveX component developed in C# using 
-          Visual Studio 2005 and WinForms 2.0 . The decision not to use WPF and XBAP was
-          taken because XBAP has no way to interact with the HTML and JavaScript in which
-          it resides. Thus, using gadget Settings to customize the behavior of the gadget
-          would be impossible. To the contrary, an ActiveX control is not only simple to 
-          build in C# but also allows for simple interaction with JavaScript. 
-
-b/ details to enable communications with the HostScript
-source:  http://msdn.microsoft.com/en-us/library/aa970060.aspx
-
-
-NOTEs re resizing the gadget
-source http://msdn.microsoft.com/en-us/library/ff486201%28v=vs.85%29.aspx
