@@ -31,8 +31,8 @@
     <UpdatePeriodically>false</UpdatePeriodically>
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>100</ApplicationRevision>
-    <ApplicationVersion>0.3.0.%2a</ApplicationVersion>
+    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationVersion>0.4.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>false</BootstrapperEnabled>
@@ -141,7 +141,9 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="gadget.xml" />
+    <Resource Include="gadget.xml">
+      <SubType>Designer</SubType>
+    </Resource>
     <Resource Include="images\icon.png" />
     <Resource Include="images\raidar.png" />
     <Resource Include="main.html">
@@ -154,6 +156,9 @@
   <ItemGroup>
     <Resource Include="COPYING.txt" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="ChangeLog.txt" />
+  </ItemGroup>
   <PropertyGroup>
     <StartArguments />
   </PropertyGroup>
@@ -165,10 +170,15 @@
   </PropertyGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)gadget.xml" "$(ProjectDir)Gadget"
+    <PostBuildEvent>mkdir "$(ProjectDir)Gadget\"
+
+copy "$(ProjectDir)gadget.xml" "$(ProjectDir)Gadget"
 copy "$(ProjectDir)main.html" "$(ProjectDir)Gadget"
+
 mkdir "$(ProjectDir)Gadget\images\"
+
 copy "$(ProjectDir)images\icon.png" "$(ProjectDir)Gadget\images"
+
 copy "$(ProjectDir)images\raidar.png" "$(ProjectDir)Gadget\images"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -248,4 +248,7 @@ it needs attention</value>
   <data name="String_Unknown_Temperature" xml:space="preserve">
     <value>Unknown temperature</value>
   </data>
+  <data name="String_UPS_Battery" xml:space="preserve">
+    <value>Battery: </value>
+  </data>
 </root>
