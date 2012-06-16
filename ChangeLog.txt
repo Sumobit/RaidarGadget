@@ -10,15 +10,15 @@ To Do
 
 
 Change Log
-v4.0
+v0.4.0
 Release version
 
-v3.4
+v0.3.4
 - Set UPS and Fan label text to BOLD back to provide better contrast against background colour 
 - UPS; added Battery % and time to tooltip
 
 
-v3.3
+v0.3.3
 - resized from 125w x 145h to 130w x 145h (130w being a standard size for SideBar Gadgets)
 - fanSpeedLabel; Set background color to match status, eg
   - 'OK' as Lime/Limegreen
@@ -31,14 +31,14 @@ v3.3
 - Allow for multiple Temperatures
 	- show details for Temperature with lowest index on gadget; show summary of other Temperatures in the tool tip
 
-v3.2
+v0.3.2
 - MAC Address; set text tp upper case
 - upsLabel; Set background color to match status, eg
   - 'OK' as Lime/Limegreen
   - 'Warn' as Orange/DarkOrange
 - DiskDescription; description of disk (brand model capacity) reformatted to fit within the tooltip
 
-v3.1
+v0.3.1
 - resized from 138w x138h to 125w x 145h
 
 
