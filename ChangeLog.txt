@@ -1,0 +1,47 @@
+To Do
+- Fans
+	- monitor fans (other than primary) for statuses other than okay and alert user
+- Temperatures
+	- monitor temperatures (other than primary) for statuses other than okay and alert user
+	- consider!! where temp is unknown use avg of temp of disks
+- set up 'Settings' form
+	- use setting form to pass PollNasRate
+	- use setting form to set IP of NAS to be monitored; allowing for each gadget to monitor a specific NAS
+
+
+Change Log
+v0.4.0
+Release version
+
+v0.3.4
+- Set UPS and Fan label text to BOLD back to provide better contrast against background colour 
+- UPS; added Battery % and time to tooltip
+
+
+v0.3.3
+- resized from 125w x 145h to 130w x 145h (130w being a standard size for SideBar Gadgets)
+- fanSpeedLabel; Set background color to match status, eg
+  - 'OK' as Lime/Limegreen
+  - 'Warn' as Orange/DarkOrange
+- DiskDescription; 
+  - simplified code to read and format description of disk (brand model capacity)
+  - updated REGEX expression to collect DiskStatus without semi colon whilst still getting the 'Sleeping' status
+- Allow for multiple Fans
+	- show details for Fan with lowest index on gadget; show summary of other fans in the tool tip
+- Allow for multiple Temperatures
+	- show details for Temperature with lowest index on gadget; show summary of other Temperatures in the tool tip
+
+v0.3.2
+- MAC Address; set text tp upper case
+- upsLabel; Set background color to match status, eg
+  - 'OK' as Lime/Limegreen
+  - 'Warn' as Orange/DarkOrange
+- DiskDescription; description of disk (brand model capacity) reformatted to fit within the tooltip
+
+v0.3.1
+- resized from 138w x138h to 125w x 145h
+
+
+NOTES
+deployment option; use the following in the post build step to publish direct (without need to install)
+xcopy /y "$(TargetDir)*.*" "$(UserProfile)\AppData\Local\Microsoft\Windows Sidebar\Gadgets\$(ProjectName).gadget\"

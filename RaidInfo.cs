@@ -1,6 +1,7 @@
 //------------------------------------------------------------------------------
 //
 //    Copyright 2012, Marc Meijer
+//    Copyright 2012, Neil Blanchard
 //
 //    This file is part of RaidarGadget.
 //
@@ -238,8 +239,11 @@ namespace RaidarGadget {
         private string mac;
         private string name;
         private string ip;
-        private RaidTemperature temp;
-        private RaidFan fan;
+        
+        private List<RaidTemperature> temps = new List<RaidTemperature>();
+        
+        private List<RaidFan> fans = new List<RaidFan>();
+        
         private RaidUPS ups;
         private List<RaidVolume> volumes = new List<RaidVolume>();
         private List<RaidDisk> disks = new List<RaidDisk>();
@@ -277,23 +281,27 @@ namespace RaidarGadget {
         }
 
         /// <summary>
-        /// Gets the device <see cref="RaidTemperature"/> structure.
+        /// Gets the list of <see cref="RaidTemperature"/> of the device.
         /// </summary>
-        public RaidTemperature Temperature {
-            get {
-                return temp;
+        public List<RaidTemperature> Temperatures
+        {
+            get
+            {
+                return temps;
             }
         }
-
+        
         /// <summary>
-        /// Gets the device <see cref="RaidFan"/> structure.
+        /// Gets the list of <see cref="RaidFan"/> of the device.
         /// </summary>
-        public RaidFan Fan {
-            get {
-                return fan;
+        public List<RaidFan> Fans
+        {
+            get
+            {
+                return fans;
             }
         }
-
+        
         /// <summary>
         /// Gets the device <see cref="RaidUPS"/> structure.
         /// </summary>
@@ -349,6 +357,8 @@ namespace RaidarGadget {
         }
 
         public void Parse(string rawData) {
+            temps.Clear();
+            fans.Clear();
             volumes.Clear();
             disks.Clear();
 
@@ -357,7 +367,8 @@ namespace RaidarGadget {
 
             // Uncomment raw package assignments below to test specific incoming package types
             // Test 1: Default test package
-            //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\tmodel!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
+            //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\t" +
+            //    "model!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
             //    "fan!!0!!status=ok::descr=2352RPM\n" +
             //    "temp!!0!!status=ok::descr=34.0C\n" +
             //    "disk!!1!!status=ok::descr=Channel 1: ST3320620AS 298 GB, 39C/102F\n" +
@@ -368,7 +379,8 @@ namespace RaidarGadget {
             //    "\t66\t1\t1\n";
 
             // Test 2: alert status messages
-            //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\tmodel!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
+            //rawData = "00:0d:a2:01:09:bd\tNASgul\t192.168.1.5\t" +
+            //    "model!!0!!mode=pro::descr=ReadyNAS NV::arch=nsp\n" +
             //    "fan!!0!!status=not_ok::descr=0RPM\n" +
             //    "temp!!1!!status=not_ok::descr=65.0C/150.0F::expected=0-60C/32-140F\n" +
             //    "volume!!1!!status=not_ok::descr= C: RAID Level X, ; 140 GB (15%)  921 GB\n" +
@@ -380,9 +392,10 @@ namespace RaidarGadget {
             //    "\t66\t1\t1\n";
 
             // Test 3: Szerda package
-            //rawData = "e0:91:f5:f9:9c:da\tXYZ-NAS\t192.168.0.1\tfan!!1!!status=ok::descr=1630RPM\n" +
+            //rawData = "e0:91:f5:f9:9c:da\tXYZ-NAS\t192.168.0.1\t" +
+            //    "fan!!1!!status=ok::descr=1630RPM\n" +
             //    "ups!!1!!status=not_present::descr=\n" +
-            //    "volume!!1!!status=ok::descr= C: RAID Level X, ; 140 GB (15%)  921 GB\n"+
+            //    "volume!!1!!status=ok::descr= C: RAID Level X, ; 140 GB (15%)  921 GB\n" +
             //    "disk!!1!!status=ok::descr= 1: SAMSUNG HD103SJ 931 GB, 39C/102F\n" +
             //    "disk!!2!!status=ok::descr= 2: SAMSUNG HD103SJ 931 GB, 38C/100F;31 ATA Errors\n" +
             //    "model!!0!!mode=home::descr=ReadyNAS Duo::arch=nsp\n" +
@@ -390,7 +403,8 @@ namespace RaidarGadget {
             //    "\t66\n";
 
             // Test 4: UPS test package
-            //rawData = "00:0d:a2:01:d4:56\tRandom\t192.168.178.27\ttemp!!1!!status=ok::descr=34.0C/93.2F::expected=0-60C/32-140F\n" +
+            //rawData = "00:0d:a2:01:d4:56\tRandom\t192.168.178.27\t" +
+            //    "temp!!1!!status=ok::descr=34.0C/93.2F::expected=0-60C/32-140F\n" +
             //    "fan!!1!!status=ok::descr=2027RPM\n" +
             //    "ups!!1!!status=ok::descr=APC Back-UPS ES 700 Battery charge: 100%, 23 min\n" +
             //    "volume!!1!!status=ok::descr=Volume C: RAID Level X, Redundant; 2432 GB (43%) of 5560 GB used\n" +
@@ -399,8 +413,60 @@ namespace RaidarGadget {
             //    "disk!!3!!status=ok::descr=Channel 3: WDC WD20EARS-00S8B1 1863 GB, 43C/109F\n" +
             //    "disk!!4!!status=ok::descr=Channel 4: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
             //    "model!!0!!mode=pro::descr=ReadyNAS NV+::arch=nsp\n" +
-            //    "	RAIDiator!!version=4.1.9-T6,time=1331164301\n" +
-            //    "	66\n";
+            //    "\tRAIDiator!!version=4.1.9-T6,time=1331164301\n" +
+            //    "\t66\n";
+
+            // Test 5: PRO6 from Interested User; multiple Fan and Temperature
+            //rawData = "00:1f:33:ea:b7:2e\tnas\t192.168.1.4\t" +
+            //    "temp!!1!!status=ok::descr=61.0C/141.8F::expected=0-65C/32-149F\n" +
+            //    "temp!!2!!status=ok::descr=45.5C/113.9F::expected=0-85C/32-185F\n" +
+            //    "fan!!3!!status=ok::descr=1985RPM::type=CAS\n" +
+            //    "fan!!2!!status=warn::descr=2280RPM::type=CPU\n" +
+            //    "fan!!1!!status=ok::descr=1280RPM::type=SYS\n" +
+            //    "ups!!1!!status=ok::descr=APC Smart-UPS 750 Battery charge: 100%, 38 min\n" +
+            //    "volume!!1!!status=ok::descr=Volume C: RAID Level X2, Redundant; 3433 GB (61%) of 5543 GB used\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: Seagate ST32000542AS 1863 GB, 44C/111F\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: Seagate ST32000542AS 1863 GB, 44C/111F\n" +
+            //    "disk!!3!!status=ok::descr=Channel 3: Seagate ST32000542AS 1863 GB, 46C/114F\n" +
+            //    "disk!!4!!status=ok::descr=Channel 4: Seagate ST32000542AS 1863 GB, 42C/107F\n" +
+            //    "disk!!5!!status=not_present::descr=Not present\n" +
+            //    "disk!!6!!status=not_present::descr=Not present\n" +
+            //    "model!!0!!mode=pro::descr=ReadyNAS Pro 6::arch=x86\n" +
+            //    "\tRAIDiator!!version=4.2.20,time=1333564262\n" +
+            //    "\t66\n";
+
+            // Test 6: MyNAS UPS test
+            //rawData = "00:1f:33:df:79:3f\tDaveyJones\t192.168.12.9\t" +
+            //    "fan!!1!!status=ok::descr=1666RPM\n" +
+            //    "ups!!1!!status=warn::descr=APC Back-UPS CS 500 Battery charge: 85%, 40 min\n" +
+            //    "volume!!1!!status=ok::descr=Volume C: RAID Level X, Redundant; 489 GB (26%) of 1846 GB used\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
+            //    "model!!0!!mode=home::descr=ReadyNAS Duo::arch=nsp\n" +
+            //    "\tRAIDiator!!version=4.1.8,time=1314924646\n" +
+            //    "\t66\n";
+
+            // Test 7: MyNAS FAN and UPS test
+            //rawData = "00:1f:33:df:79:3f\tDaveyJones\t192.168.12.9\t" +
+            //    "fan!!1!!status=warn::descr=0RPM\n" +
+            //    "ups!!1!!status=warn::descr=APC Back-UPS CS 500 Battery charge: 85%, 40 min\n" +
+            //    "volume!!1!!status=ok::descr=Volume C: RAID Level X, Redundant; 489 GB (26%) of 1846 GB used\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: WDC WD20EARS-00S8B1 1863 GB, 42C/107F\n" +
+            //    "model!!0!!mode=home::descr=ReadyNAS Duo::arch=nsp\n" +
+            //    "\tRAIDiator!!version=4.1.8,time=1314924646\n" +
+            //    "\t66\n";
+
+            // Test 8: MyNAS Sleeping test
+            //rawData = "00:1f:33:df:79:3f\tDaveyJones\t192.168.12.9\t" +
+            //    "fan!!1!!status=ok::descr=1339RPM\n" +
+            //    "ups!!1!!status=ok::descr=APC Back-UPS CS 500 Battery charge: 100%, 52 min\n" +
+            //    "volume!!1!!status=ok::descr=Volume C: RAID Level X, Redundant; 443 GB (24%) of 1846 GB used\n" +
+            //    "disk!!1!!status=ok::descr=Channel 1: WDC WD20EARS-00S8B1 1863 GB, 0C/32F[Sleeping]\n" +
+            //    "disk!!2!!status=ok::descr=Channel 2: WDC WD20EARS-00S8B1 1863 GB, 0C/32F[Sleeping]\n" +
+            //    "model!!0!!mode=home::descr=ReadyNAS Duo::arch=nsp\n" +
+            //    "\tRAIDiator!!version=4.1.8,time=1314924646\n" +
+            //    "\t66";
 
             // Split the raw data
             string[] outerArr = rawData.Split('\t');
@@ -434,11 +500,15 @@ namespace RaidarGadget {
 
                     switch (type) {
                         case "temp": {
-                                temp = new RaidTemperature(property);
+                                //temp = new RaidTemperature(property);
+                                RaidTemperature temp = new RaidTemperature(property, id);
+                                temps.Add(temp);
                                 break;
                             }
                         case "fan": {
-                                fan = new RaidFan(property);
+                                //fan = new RaidFan(property);
+                                RaidFan fan = new RaidFan(property, id);
+                                fans.Add(fan);
                                 break;
                             }
                         case "ups": {
@@ -491,6 +561,7 @@ namespace RaidarGadget {
             }
 
             // TODO: Get device time???
+            // Note value doesnt change with time.  Might be related to firmware version timestamp
             //r = new Regex(@".*time=([0-9]+).*", RegexOptions.Compiled);
             //patternMatch = r.Match(versionUnparsed);
             //if (patternMatch.Groups.Count >= 2)
@@ -505,7 +576,6 @@ namespace RaidarGadget {
 
             this.bootFlag = outerArr[5];
         }
-
     }
 
     /// <summary>
@@ -515,6 +585,7 @@ namespace RaidarGadget {
         private static Regex tempRegEx = new Regex(@"^status=([a-z_]+)::descr=([0-9\.]+)C/([0-9\.]+)F::expected=([0-9]+)-([0-9]+)C/([0-9]+)-([0-9]+)F", RegexOptions.Compiled);
 
         private Status status = Status.unknown;
+        private int index;
         private float tempCelcius;
         private float tempFahrenheit;
         private int minExpectedCelcius;
@@ -528,6 +599,17 @@ namespace RaidarGadget {
         public Status Status {
             get {
                 return status;
+            }
+        }
+
+        /// <summary>
+        /// Gets the index of the Temperature
+        /// </summary>
+        public int Index
+        {
+            get
+            {
+                return index;
             }
         }
 
@@ -590,7 +672,8 @@ namespace RaidarGadget {
         /// temperature string.
         /// </summary>
         /// <param name="unparsedTemperature"></param>
-        public RaidTemperature(string unparsedTemperature) {
+        public RaidTemperature(string unparsedTemperature, int id) {
+            index = id;
             Match match = tempRegEx.Match(unparsedTemperature);
 
             if (match.Groups.Count == 8) {
@@ -618,10 +701,13 @@ namespace RaidarGadget {
     /// Contains the fan information of the device.
     /// </summary>
     public class RaidFan {
-        private static Regex fanRegEx = new Regex(@"^status=([a-z_]+)::descr=([0-9]+)RPM", RegexOptions.Compiled);
+        //private static Regex fanRegEx = new Regex(@"^status=([a-z_]+)::descr=([0-9]+)RPM", RegexOptions.Compiled);
+        private static Regex fanRegEx = new Regex(@"^status=([a-z_]+)::descr=([0-9]+)RPM(?:::type=)?([a-zA-Z]+)?", RegexOptions.Compiled);
 
         private Status status = Status.unknown;
+        private int index;
         private string fanSpeed;
+        private string fanType;
 
         /// <summary>
         /// Gets the fan status
@@ -629,6 +715,17 @@ namespace RaidarGadget {
         public Status Status {
             get {
                 return status;
+            }
+        }
+
+        /// <summary>
+        /// Gets the index of the fan
+        /// </summary>
+        public int Index
+        {
+            get
+            {
+                return index;
             }
         }
 
@@ -642,18 +739,39 @@ namespace RaidarGadget {
         }
 
         /// <summary>
+        /// Gets the fan type
+        /// </summary>
+        public string FanType
+        {
+            get
+            {
+                return fanType;
+            }
+        }
+
+        /// <summary>
         /// Construct a <see cref="RaidFan"/> from unparsed fan data.
         /// </summary>
         /// <param name="unparsedTemperature"></param>
-        public RaidFan(string unparsedFan) {
+        public RaidFan(string unparsedFan, int id) {
+            index = id;
             Match match = fanRegEx.Match(unparsedFan);
 
-            if (match.Groups.Count == 3) {
+            if (match.Groups.Count >= 3) 
+            {
                 string statusString = match.Groups[1].Value;
-                if (!Status.TryParse(statusString, out status)) {
+                if (!Status.TryParse(statusString, out status)) 
+                {
                     status = Status.unknown;
                 }
                 fanSpeed = match.Groups[2].Value;
+                if (match.Groups.Count == 4)
+                {
+                    if (match.Groups[3].Success)
+                    {
+                        fanType = match.Groups[3].Value;
+                    }
+                }
             }
         }
     }
@@ -808,9 +926,9 @@ namespace RaidarGadget {
         }
 
         /// <summary>
-        /// Construct a <see cref="RaidUPS"/> from a unparsed UPS string.
+        /// Construct a <see cref="RaidVolume"/> from a unparsed Volume string.
         /// </summary>
-        /// <param name="unparsedTemperature"></param>
+        /// <param name="unparsedVolume"></param>
         public RaidVolume(string unparsedVolume, int id) {
             index = id;
             Match match = volumeRegEx.Match(unparsedVolume);
@@ -833,7 +951,9 @@ namespace RaidarGadget {
     /// The status and information of a disk on the device.
     /// </summary>
     public class RaidDisk {
-        private static Regex diskRegEx = new Regex(@"^status=([a-z_]+)::descr=([^:]+):[ ]*([^,]+),[ ]*([0-9]+)[^0-9]+([0-9]+).\[*([^\]]+)*.*", RegexOptions.Compiled);
+        //private static Regex diskRegEx = new Regex(@"^status=([a-z_]+)::descr=([^:]+):[ ]*([^,]+),[ ]*([0-9]+)[^0-9]+([0-9]+).\[*([^\]]+)*.*", RegexOptions.Compiled);
+        private static Regex diskRegEx = new Regex(@"^status=([a-z_]+)::descr=([^:]+):[ ]*([^,]+),[ ]*([0-9]+)[^0-9]+([0-9]+)[^0-9][\;|[*]?([^\]]+)*.*", RegexOptions.Compiled);
+        //private static Regex diskDescRegEx = new Regex(@"^[ ]*([^,]+)*.*", RegexOptions.Compiled);
 
         private Status status = Status.unknown;
         private int index;
@@ -932,7 +1052,10 @@ namespace RaidarGadget {
                     status = Status.unknown;
                 }
                 diskChannel = match.Groups[2].Value;
+
+                // review; use REGEX to break this string into parts Make, Model, Capacity and Capacity Units
                 diskType = match.Groups[3].Value;
+
                 tempCelcius = Int32.Parse(match.Groups[4].Value);
                 tempFahrenheit = Int32.Parse(match.Groups[5].Value);
                 if (match.Groups.Count >= 7) {

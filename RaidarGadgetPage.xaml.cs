@@ -1,6 +1,7 @@
 ﻿//------------------------------------------------------------------------------
 //
 //    Copyright 2012, Marc Meijer
+//    Copyright 2012, Neil Blanchard
 //
 //    This file is part of RaidarGadget.
 //
@@ -29,6 +30,7 @@ using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using StringResources = RaidarGadget.Properties.Resources;
+using System.Windows.Interop;
 
 namespace RaidarGadget {
     /// <summary>
@@ -38,6 +40,8 @@ namespace RaidarGadget {
     public partial class RaidarGadgetPage : Page {
 
         // Constants
+        private const int maxTemperatures = 4;
+        private const int maxFans = 4;
         private const int maxVolumes = 1;
         private const int maxDisks = 8;
 
@@ -49,6 +53,7 @@ namespace RaidarGadget {
         // Globals
         private RaidInfo raidInfo;
         private RaidarSnmp raidar;
+        private int pollNasRate = 6;    // Sets Nas polling rate
         private int counter = 0;
         private float oldTemperatureY = 50f;
         private StringAnimationUsingKeyFrames stringAnimation;
@@ -75,8 +80,8 @@ namespace RaidarGadget {
             squareLeds.Add(led8square);
 
             volumeInfoLabels.Add(volumeLabel0);
-            volumeInfoLabels.Add(volumeLabel1);
-            volumeInfoLabels.Add(volumeLabel2);
+            volumeInfoLabels.Add(volumeLabel1);     // these might not be needed
+            volumeInfoLabels.Add(volumeLabel2);     // these might not be needed
 
             raidInfo = new RaidInfo();
             raidar = new RaidarSnmp();
@@ -112,7 +117,7 @@ namespace RaidarGadget {
         /// </summary>
         private void StartPollingNas() {
             updateTimer = new DispatcherTimer();
-            updateTimer.Interval = new TimeSpan(0, 0, 6); // 5 sec
+            updateTimer.Interval = new TimeSpan(0, 0, pollNasRate); // 5 sec
             updateTimer.Tick += new EventHandler(updateTimerTick);
             updateTimer.Start();
         }
@@ -199,7 +204,7 @@ namespace RaidarGadget {
 
             SetLabelWithStatus(fanSpeedLabel, String.Empty, Status.nas_connection_lost);
             SetToolTip(fanSpeedLabel, String.Empty);
-
+                        
             minTempLabel.Content = String.Empty;
             maxTempLabel.Content = String.Empty;
             SetLabelWithStatus(curTempLabel, String.Empty, Status.nas_connection_lost);
@@ -239,16 +244,98 @@ namespace RaidarGadget {
 
                 SetNasInfo();
 
-                SetFanInfo();
-
+                //SetFanInfo();
+                if (raidInfo.Fans.Count == 0)
+                {
+                    // No fan
+                    SetFanInfo(null);
+                }
+                else if (raidInfo.Fans.Count == 1)
+                {
+                    // only one fan then show details
+                    SetFanInfo(raidInfo.Fans[0]);
+                }
+                else if (raidInfo.Fans.Count >= 1)
+                {
+                    // sort Fan data by index
+                    for (int i = 0; (i < maxFans) && (i < raidInfo.Fans.Count); i++)
+                    {
+                        for (int j = i + 1; (j < maxFans) && (j < raidInfo.Fans.Count); j++)
+                        {
+                            if (raidInfo.Fans[i].Index > raidInfo.Fans[j].Index)
+                            {
+                                RaidFan tempFan = raidInfo.Fans[i];
+                                raidInfo.Fans[i] = raidInfo.Fans[j];
+                                raidInfo.Fans[j] = tempFan;
+                            }
+                        }
+                    }
+                    SetFanInfo(raidInfo.Fans[0]);
+                    string txtFan = "";
+                    for (int i = 0; (i < maxFans) && (i < raidInfo.Fans.Count); i++)
+                    {
+                        // set tooltip with summary for all fans
+                        txtFan += raidInfo.Fans[i].FanType + " " + raidInfo.Fans[i].FanSpeed +
+                            StringResources.String_rpm + " " + raidInfo.Fans[i].Status;
+                        if (i < raidInfo.Fans.Count-1)
+                        {
+                            txtFan += "\n";
+                        }
+                        SetToolTip(fanSpeedLabel, txtFan);
+                    }
+                }
+                
                 SetUpsInfo();
 
-                SetTemperatureInfo();
-
+                //SetTemperatureInfo();
+                if (raidInfo.Temperatures.Count == 0)
+                {
+                    // no temp
+                    SetTemperatureInfo(null);
+                }
+                else if (raidInfo.Temperatures.Count == 1)
+                {
+                    // only one temp then show details
+                    SetTemperatureInfo(raidInfo.Temperatures[0]);
+                }
+                else if (raidInfo.Temperatures.Count >= 1)
+                {
+                    // sort Temperature data by index
+                    for (int i = 0; (i < maxTemperatures) && (i < raidInfo.Temperatures.Count); i++)
+                    {
+                        for (int j = i + 1; (j < maxTemperatures) && (j < raidInfo.Temperatures.Count); j++)
+                        {
+                            if (raidInfo.Temperatures[i].Index > raidInfo.Temperatures[j].Index)
+                            {
+                                RaidTemperature tmpTemp = raidInfo.Temperatures[i];
+                                raidInfo.Temperatures[i] = raidInfo.Temperatures[j];
+                                raidInfo.Temperatures[j] = tmpTemp;
+                            }
+                        }
+                    }
+                    SetTemperatureInfo(raidInfo.Temperatures[0]);
+                    string txtTemp = "";
+                    for (int i = 0; (i < maxTemperatures) && (i < raidInfo.Temperatures.Count); i++)
+                    {
+                        // set tooltip with summary for all temperatures (label, thermometer and level)
+                        txtTemp += raidInfo.Temperatures[i].Index + " " + raidInfo.Temperatures[i].TempCelcius +
+                            StringResources.String_Celsius + " " + raidInfo.Temperatures[i].Status;
+                        if (i < raidInfo.Temperatures.Count-1)
+                        {
+                            txtTemp += "\n";
+                        }
+                        SetToolTip(curTempLabel, txtTemp);
+                        SetToolTip(thermometerPath, txtTemp);
+                        SetToolTip(levelPath, txtTemp);
+                    }
+                }
+ 
+                // set Volume information
                 for (int i = 0; (i < maxVolumes) && (i < raidInfo.Volumes.Count); i++) {
                     SetVolumeStatus(raidInfo.Volumes[i], volumeInfoLabels[i]);
                 }
 
+                // set Disk information
                 for (int i = 0; (i < maxDisks) && i < raidInfo.Disks.Count; i++) {
                     SetDiskStatus(squareLeds[i], raidInfo.Disks[i]);
                 }
@@ -264,7 +351,7 @@ namespace RaidarGadget {
 
             infoLabel.Content = raidInfo.Model + "\n" + raidInfo.IpAdress;
             SetToolTip(infoLabel,
-                StringResources.String_MacAddress + raidInfo.MacAdress + "\n" +
+                StringResources.String_MacAddress + raidInfo.MacAdress.ToUpper() + "\n" +
                 StringResources.String_Firmware + raidInfo.SoftwareName + " v" + raidInfo.SoftwareVersion);
         }
 
@@ -272,34 +359,74 @@ namespace RaidarGadget {
         /// Update UPS information
         /// </summary>
         private void SetUpsInfo() {
-            if ((raidInfo.Ups == null) || (raidInfo.Ups.Status == Status.not_present)) {
-                upsLabel.Content = String.Empty;
-            } else {
-                upsLabel.Content = StringResources.String_UPS + raidInfo.Ups.Charge + "%";
+            if ((raidInfo.Ups == null) || (raidInfo.Ups.Status == Status.not_present)) 
+            {
+                //upsLabel.Content = String.Empty;
+                SetLabelWithStatus(upsLabel, String.Empty, Status.unknown);
+                upsLabel.Background = new SolidColorBrush(Colors.Transparent);
+                upsLabel.BorderBrush = new SolidColorBrush(Colors.Transparent);
 
-                // Tooltip and alert status
-                SetToolTip(upsLabel, StringResources.String_UPS + "\n" + raidInfo.Ups.Description + "\n" +
-                    RaidStatusMap.GetStatusString(raidInfo.Ups.Status, raidInfo.Ups));
-                if (raidInfo.Ups.Status == Status.ok) {
-                    upsLabel.Foreground = defaultBrush;
-                } else {
-                    upsLabel.Foreground = alertBrush;
+                // Clear Tooltip message
+                SetToolTip(upsLabel, String.Empty);
+            } 
+            else 
+            {
+                // Set label text and alert status
+                if (raidInfo.Ups.Status == Status.ok)
+                {
+                    SetLabelWithStatus(upsLabel, StringResources.String_UPS + raidInfo.Ups.Charge + "%", Status.ok);
+                    upsLabel.Background = new SolidColorBrush(Colors.Lime);
+                    upsLabel.BorderBrush = new SolidColorBrush(Colors.LimeGreen);
+                    upsLabel.Foreground = new SolidColorBrush(Colors.Black);
                 }
+                else //if (raidInfo.Ups.Status == Status.warn)
+                {
+                    SetLabelWithStatus(upsLabel, StringResources.String_UPS + raidInfo.Ups.TimeLeft, raidInfo.Ups.Status);
+                    upsLabel.Background = new SolidColorBrush(Colors.Orange);
+                    upsLabel.BorderBrush = new SolidColorBrush(Colors.DarkOrange);
+                }
+
+                // Set Tooltip message
+                SetToolTip(upsLabel, StringResources.String_UPS + "\n" + raidInfo.Ups.Description + "\n" +
+                    StringResources.String_UPS_Battery + raidInfo.Ups.Charge + "%, " + raidInfo.Ups.TimeLeft +"\n" +
+                    RaidStatusMap.GetStatusString(raidInfo.Ups.Status, raidInfo.Ups));
             }
         }
-
+        
         /// <summary>
         /// Update fan information
         /// </summary>
-        private void SetFanInfo() {
-            fanSpeedLabel.Content = StringResources.String_Fan + raidInfo.Fan.FanSpeed + StringResources.String_rpm;
+        /// <param name="fan"></param>
+        private void SetFanInfo(RaidFan fan)
+        {
+            if ((fan == null) || (fan.Status == Status.not_present))
+            {
+                fanSpeedLabel.Content = String.Empty;
+                fanSpeedLabel.Background = new SolidColorBrush(Colors.Transparent);
+                fanSpeedLabel.BorderBrush = new SolidColorBrush(Colors.Transparent);
 
-            // Tooltip and alert status
-            SetToolTip(fanSpeedLabel, RaidStatusMap.GetStatusString(raidInfo.Fan.Status, raidInfo.Fan));
-            if (raidInfo.Fan.Status == Status.ok) {
-                fanSpeedLabel.Foreground = defaultBrush;
-            } else {
-                fanSpeedLabel.Foreground = alertBrush;
+                // Clear Tooltip message
+                SetToolTip(fanSpeedLabel, String.Empty);
+            }
+            else
+            {
+                // Set label text and alert status
+                if (fan.Status == Status.ok)
+                {
+                    SetLabelWithStatus(fanSpeedLabel, StringResources.String_Fan + fan.FanSpeed + StringResources.String_rpm, Status.ok);
+                    fanSpeedLabel.Background = new SolidColorBrush(Colors.Lime);
+                    fanSpeedLabel.BorderBrush = new SolidColorBrush(Colors.LimeGreen);
+                    fanSpeedLabel.Foreground = new SolidColorBrush(Colors.Black);
+                }
+                else //if (raidInfo.Fan.Status == Status.warn)
+                {
+                    SetLabelWithStatus(fanSpeedLabel, StringResources.String_Fan + fan.FanSpeed + StringResources.String_rpm, fan.Status);
+                    fanSpeedLabel.Background = new SolidColorBrush(Colors.Orange);
+                    fanSpeedLabel.BorderBrush = new SolidColorBrush(Colors.DarkOrange);
+                }
+
+                // Set Tooltip message
+                SetToolTip(fanSpeedLabel, RaidStatusMap.GetStatusString(fan.Status, fan));
             }
         }
 
@@ -330,62 +457,79 @@ namespace RaidarGadget {
         /// <summary>
         /// Update temperature information
         /// </summary>
-        private void SetTemperatureInfo() {
-            if (raidInfo.Temperature != null) {
+        /// <param name="fan"></param>
+        private void SetTemperatureInfo(RaidTemperature temperature)
+        {
+            if (temperature != null)
+            {
                 // Set label values
-                minTempLabel.Content = raidInfo.Temperature.MinExpectedCelcius +
+                minTempLabel.Content = temperature.MinExpectedCelcius +
                     StringResources.String_Celsius;
-                maxTempLabel.Content = raidInfo.Temperature.MaxExpectedCelcius +
+                maxTempLabel.Content = temperature.MaxExpectedCelcius +
                     StringResources.String_Celsius;
-                curTempLabel.Content = raidInfo.Temperature.TempCelcius +
+                curTempLabel.Content = temperature.TempCelcius +
                     StringResources.String_Celsius;
 
                 // Tooltip and alert status
                 SetToolTip(curTempLabel, RaidStatusMap.GetStatusString(
-                    raidInfo.Temperature.Status, raidInfo.Temperature));
+                    temperature.Status, temperature));
                 //SetToolTip(minTempLabel, RaidStatusMap.GetStatusString(
                 //    raidInfo.Temperature.Status, raidInfo.Temperature));
                 //SetToolTip(maxTempLabel, RaidStatusMap.GetStatusString(
                 //    raidInfo.Temperature.Status, raidInfo.Temperature));
                 SetToolTip(thermometerPath, RaidStatusMap.GetStatusString(
-                    raidInfo.Temperature.Status, raidInfo.Temperature));
+                    temperature.Status, temperature));
                 SetToolTip(levelPath, RaidStatusMap.GetStatusString(
-                    raidInfo.Temperature.Status, raidInfo.Temperature));
+                    temperature.Status, temperature));
 
-                if (raidInfo.Temperature.Status == Status.ok) {
+                if (temperature.Status == Status.ok)
+                {
                     curTempLabel.Foreground = defaultBrush;
-                } else {
+                }
+                else
+                {
                     curTempLabel.Foreground = alertBrush;
                 }
 
                 // Calculate new Y value for thermometer mercury
-                float tempRange = raidInfo.Temperature.MaxExpectedCelcius - raidInfo.Temperature.MinExpectedCelcius;
-                float tempFractional = raidInfo.Temperature.TempCelcius / tempRange;
+                float tempRange = temperature.MaxExpectedCelcius - temperature.MinExpectedCelcius;
+                float tempFractional = temperature.TempCelcius / tempRange;
                 float newTemperatureY = 50f - (25f * tempFractional);
 
                 // Calculate the thermometer mercury color
                 levelPath.Fill = new SolidColorBrush(Colors.DarkGray);
-                if (raidInfo.Temperature.TempCelcius <= raidInfo.Temperature.MinExpectedCelcius) {
+                if (temperature.TempCelcius <= temperature.MinExpectedCelcius)
+                {
                     levelPath.Fill = new SolidColorBrush(Colors.Blue);
-                } else if (raidInfo.Temperature.TempCelcius >= raidInfo.Temperature.MaxExpectedCelcius) {
+                }
+                else if (temperature.TempCelcius >= temperature.MaxExpectedCelcius)
+                {
                     levelPath.Fill = new SolidColorBrush(Colors.Red);
                 }
 
                 // Clip temperature bounds to avoid drawing errors
-                if (newTemperatureY < 25f) {
+                if (newTemperatureY < 25f)
+                {
                     newTemperatureY = 25f;
-                } else if (newTemperatureY > 50f) {
+                }
+                else if (newTemperatureY > 50f)
+                {
                     newTemperatureY = 50f;
                 }
 
                 // Draw new mercury level
                 PathGeometry geometry = levelPath.Data as PathGeometry;
-                if (geometry != null) {
-                    if (Math.Abs(newTemperatureY - oldTemperatureY) >= float.Epsilon) {
-                        foreach (PathFigure figure in geometry.Figures) {
-                            for (int i = 0; i < 2; i++) {
+                if (geometry != null)
+                {
+                    if (Math.Abs(newTemperatureY - oldTemperatureY) >= float.Epsilon)
+                    {
+                        foreach (PathFigure figure in geometry.Figures)
+                        {
+                            for (int i = 0; i < 2; i++)
+                            {
                                 LineSegment lineSegment = figure.Segments[i] as LineSegment;
-                                if (lineSegment != null) {
+                                if (lineSegment != null)
+                                {
                                     lineSegment.Point = new Point(lineSegment.Point.X, newTemperatureY);
                                 }
                             }
@@ -393,7 +537,10 @@ namespace RaidarGadget {
                         oldTemperatureY = newTemperatureY;
                     }
                 }
-            } else {
+            }
+            else
+            {
+                // No temperature Sensor; so no value to display
                 SetToolTip(curTempLabel, StringResources.String_Unknown_Temperature);
                 SetToolTip(thermometerPath, StringResources.String_Unknown_Temperature);
                 SetToolTip(levelPath, StringResources.String_Unknown_Temperature);
@@ -408,19 +555,47 @@ namespace RaidarGadget {
         private static void SetDiskStatus(Label label, RaidDisk disk) {
             string diskInfoString;
             string diskState = "";
+            string diskMakeModel = "";
+            
             if (disk.DiskState != null) {
                 if (disk.DiskState.CompareTo("Sleeping") == 0) {
                     diskInfoString = StringResources.String_sleep;
                     diskState = StringResources.String_sleeping;
                 } else {
                     diskInfoString = disk.TempCelcius + StringResources.String_Celsius;
+                    diskState = disk.DiskState;
                 }
                 SetLedStatus(label, disk.Status);
                 label.Content = diskInfoString;
 
                 if (disk.Status == Status.ok) {
-                    SetToolTip(label, StringResources.String_Channel + disk.Index + ": " +
-                        diskState + "\n" + disk.DiskType);
+                    // breakdown the Disk Description to allow reformatting in tooltip
+                    // test code for DiskType details
+                    //string mytext = "ST3320620AS 298 GB";
+                    //string mytext = "SAMSUNG HD103SJ 931 GB";
+
+                    // count number of spaces in string; split string into this number of parts at those spaces
+
+                    //int count = mytext.Split(' ').Length - 1;
+                    //string[] splitDiskType = mytext.Split(new char[] { ' ' }, count);
+
+                    int count = disk.DiskType.Split(' ').Length - 1;
+                    string[] splitDiskType = disk.DiskType.Split(new char[] { ' ' }, count);
+                    if (splitDiskType.Length > 0)
+                    {
+                        diskMakeModel = splitDiskType[0];
+                        for (int i = 1; i < splitDiskType.Length; i++)
+                            {
+                                diskMakeModel += "\n" + splitDiskType[i];
+                            }
+                    }
+                    if (diskState != "") 
+                    {
+                        SetToolTip(label, StringResources.String_Channel + disk.Index + ": " + "\n" + diskState + "\n" + diskMakeModel);
+                    } else {
+                        SetToolTip(label, StringResources.String_Channel + disk.Index + ": " + "\n" + diskMakeModel);
+                    }
+
                 } else {
                     SetToolTip(label, RaidStatusMap.GetStatusString(disk.Status, disk));
                 }
@@ -488,17 +663,20 @@ namespace RaidarGadget {
             // with some modified security settings, is possible. This opens a world of
             // possibilities like a fly-out for settings or a sizeable GUI...
 
+            //http://blogs.msdn.com/b/llobo/archive/2009/11/03/new-wpf-features-script-interop-in-xbap.aspx
+
             //// Retrieve the script object. The XBAP must be hosted in a HTML iframe or
             //// the HostScript object will be null.
             //dynamic script = BrowserInteropHelper.HostScript;
 
-            //if (script != null) {
+            //if (script != null)
+            //{
             //    Log("Script isn't null !");
             //    // Call a script function.
             //    // For this to work the function 'func' should be added in javascript to main.html
             //    script.func("Hello host!");
             //}
-            CircularLogBuffer.DumpLog();
+            //CircularLogBuffer.DumpLog();
         }
 
         /// <summary>
@@ -515,6 +693,5 @@ namespace RaidarGadget {
         private void Dispatcher_ShutdownStarted(object sender, EventArgs e) {
             ExitPolling();
         }
-
     }
 }
